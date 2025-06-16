@@ -13,7 +13,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login({ email, password });
+      await login(email);
       // Redirect to home page after successful login
       navigate("/home");
     } catch (error) {

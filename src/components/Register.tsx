@@ -14,7 +14,7 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await register({ name, email, password });
+      await register(email, password, name);
       // Redirect to home page after successful registration
       navigate("/home");
     } catch (error) {

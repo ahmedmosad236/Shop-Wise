@@ -3,11 +3,16 @@ import { jwtDecode } from "jwt-decode";
 
 const JWT_SECRET = "your-secret-key"; // في التطبيق الحقيقي، يجب أن يكون هذا متغير بيئي
 
-// Mock users data
-let mockUsers: User[] = [
+// Mock users data with passwords (in a real app, passwords would be hashed)
+interface MockUserWithPassword extends User {
+  password: string;
+}
+
+const mockUsers: MockUserWithPassword[] = [
   {
     id: "1",
     email: "user@example.com",
+    password: "testpass123", // In a real app, this would be hashed
     name: "Test User",
     isEmailVerified: true,
     addresses: [
@@ -45,7 +50,9 @@ export const authAPI = {
 
     const token = generateToken({ userId: user.id, email: user.email });
     console.log("Login - Generated token:", token);
-    return { token, user };
+    // Remove password from returned user object
+    const { password: _, ...userWithoutPassword } = user; // eslint-disable-line @typescript-eslint/no-unused-vars
+    return { token, user: userWithoutPassword };
   },
 
   register: async (
@@ -53,12 +60,14 @@ export const authAPI = {
     password: string,
     name: string
   ): Promise<{ token: string; user: User }> => {
+    // In a real application, we would hash the password
     const existingUser = mockUsers.find((u) => u.email === email);
     if (existingUser) throw new Error("User already exists");
 
-    const newUser: User = {
+    const newUser: MockUserWithPassword = {
       id: Math.random().toString(36).substr(2, 9),
       email,
+      password, // In a real app, this would be hashed
       name,
       isEmailVerified: false,
       addresses: [],
@@ -67,10 +76,13 @@ export const authAPI = {
       updatedAt: new Date().toISOString(),
     };
 
-    mockUsers = [...mockUsers, newUser];
+    // Since we're using const for mockUsers, we need to modify it using array methods
+    mockUsers.push(newUser);
+
     const token = generateToken({ userId: newUser.id, email: newUser.email });
-    console.log("Register - Generated token:", token);
-    return { token, user: newUser };
+    // Remove password from returned user object using object destructuring
+    const { password: _, ...userWithoutPassword } = newUser; // eslint-disable-line @typescript-eslint/no-unused-vars
+    return { token, user: userWithoutPassword };
   },
 
   validateToken: async (token: string): Promise<User> => {

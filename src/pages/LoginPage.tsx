@@ -9,15 +9,17 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     try {
-      await login({ email, password });
-      navigate("/home");
+      await login(email);
+      navigate("/");
     } catch {
-      // Error is handled by the auth context
+      setError("Failed to login");
     } finally {
       setLoading(false);
     }
@@ -75,6 +77,10 @@ export const LoginPage: React.FC = () => {
               />
             </div>
           </div>
+
+          {error && (
+            <div className="text-red-500 text-sm text-center">{error}</div>
+          )}
 
           <div>
             <Button type="submit" className="w-full" disabled={loading}>
